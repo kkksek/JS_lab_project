@@ -1,0 +1,167 @@
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <title>JS Lab</title>
+    <style>
+      
+		#click{
+		width: 200px;
+		height: 200px;
+		background-color: 'white';
+		border-radius: 100%;
+		text-align: center;
+		float: center;
+		display: block;
+		margin-left: auto;
+		margin-right: auto;
+		}
+		
+		#start{
+		display: block;
+		margin-left: auto;
+		margin-right: auto;
+		margin-top: 200px;
+		padding: 10px;
+		background-color: #40E0D0;
+		border-radius: 5px;
+		}
+		
+		#stat{
+		text-align: center;
+		padding: 20px;
+		}
+		
+		
+    </style>
+</head>
+<body>
+<div id = "app">
+<button id ="start" type="button" onclick="startGame()">Start</button><br>
+<button id ="click">Click on me when color change</button>
+</div>
+<script>
+
+	const click = document.querySelector('#click');
+    const clickTimes =[];
+	const colorChangeTimes =[];
+	const reactionTimes =[];
+	let counter=0;
+	let div = document.createElement('div');
+	div.setAttribute("id", "stat");
+	
+	
+	function changeColor(){
+		const randomColor = Math.floor(Math.random()*16777215).toString(16);
+		document.getElementById("click").style.backgroundColor = "#" + randomColor;
+		colorChangeTimes.push(new Date().getTime());
+		console.log("Color change times: " + colorChangeTimes);
+		if (colorChangeTimes.length == 2&clickTimes.length==0){
+			clickTimes.push(null);
+			console.log("Not clicked");
+		}
+		else if (colorChangeTimes[colorChangeTimes.length-2]>clickTimes[clickTimes.length-1]){
+			clickTimes.push(null);
+			console.log("Not clicked");
+		}
+	}
+
+	function getRandomInt(min,max) {
+		return Math.floor(min + Math.random() * (max-min +1));
+	}
+	
+	function addClickTimes(){
+		const now = new Date();
+		if (now.getTime()>colorChangeTimes[colorChangeTimes.length-1]&colorChangeTimes.length>clickTimes.length){
+			clickTimes.push(now.getTime())
+			console.log("click time: " + now.getTime());
+		}
+		getStatistics();
+	}
+	
+	function getStatistics(){
+			document.getElementById('app').prepend(div);
+			for (let i=0;i<colorChangeTimes.length;i++){
+				if (clickTimes[i]!==null){
+					reactionTimes[i]=clickTimes[i] - colorChangeTimes[i];
+				}
+				else{
+				reactionTimes[i]=null;
+				}
+			}
+			console.log("ReactionTimes: " + reactionTimes);
+			
+			var min =5000;
+			for (var i = 0; i < reactionTimes.length; i++) {
+			if (reactionTimes[i]!==null){
+				if (reactionTimes[i] < min) {
+					min = reactionTimes[i];
+				}
+			}
+			}
+			
+			var max = reactionTimes[0];
+			for (var i = 0; i < reactionTimes.length; i++) {
+				if (reactionTimes[i] > max) {
+					max = reactionTimes[i];
+				}
+			}
+			
+			var average = 0;
+			var sum = 0;
+			var countReactions =0;
+			for (var i = 0; i < reactionTimes.length; i++) {
+				if (reactionTimes[i]!==null){
+					sum += reactionTimes[i];
+					countReactions++;
+				}
+			}
+			average = Math.round(sum/countReactions);
+			
+			div.innerText = 'Max reaction time:' + max + 'ms' +
+			'\nMin reaction time:' + min + 'ms' +
+			'\nAverage reaction time:' + average + 'ms';
+			document.getElementById('app').append(div);
+	}
+	
+	function clearGame(){
+		div.remove();
+		clickTimes.length = 0;
+		colorChangeTimes.length =0;
+		reactionTimes.length =0;
+		counter=0;
+		document.getElementById("click").style.backgroundColor = "white";
+		document.getElementById("click").innerText="Click on me when color change";
+	}
+	
+	function startGame(){
+		const state = document.getElementById("start").innerText
+	
+		if (state=="Start"){
+			clearGame();
+			var quantity = prompt("How many times do you want to try?:");
+			document.getElementById("start").innerText="Stop";
+			click.addEventListener("click", ()=>{addClickTimes();});
+			intervalID = setInterval(function(){
+			changeColor();
+			counter++;
+			if (counter==quantity){
+			setTimeout(()=> {
+			document.getElementById("start").innerText="Start"
+			document.getElementById("click").innerText="Game over";
+			}
+			,5000);
+			clearInterval(intervalID);
+			
+			}
+			},getRandomInt(1000,5000));
+		}
+		else {
+			document.getElementById("start").innerText="Start";
+			document.getElementById("click").innerText="Game over";
+			clearInterval(intervalID);
+			console.log("Click times: " + clickTimes);
+		}
+	}
+</script>
+</body>
+</html>
